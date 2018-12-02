@@ -3,7 +3,7 @@ version: 2.1
 description: Record deployment on New Relic
 
 examples:
-  install_kubectl:
+  record-deployment:
     description: Record deployment on New Relic
     usage:
       version: 2.1
@@ -44,16 +44,14 @@ commands:
         description: User that deployed the new version
         default: ${CIRCLE_USERNAME}
     steps:
-      - run:
-          command: >
-            run: >
-              curl -X POST "https://api.newrelic.com/v2/applications/<< parameters.app-id >>/deployments.json"
-              -H "X-Api-Key:<< parameters.api-key >>" -i
-              -H "Content-Type: application/json"
-              -d
-              '{
-                "deployment": {
-                  "revision": "'<< parameters.revision >>'",
-                  "user": "'<< parameters.user >>'"
-                }
-              }'
+      - run: >
+          curl -X POST "https://api.newrelic.com/v2/applications/<< parameters.app-id >>/deployments.json"
+          -H "X-Api-Key:<< parameters.api-key >>" -i
+          -H "Content-Type: application/json"
+          -d
+          '{
+            "deployment": {
+              "revision": "'<< parameters.revision >>'",
+              "user": "'<< parameters.user >>'"
+            }
+          }'
