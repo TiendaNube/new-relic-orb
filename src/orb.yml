@@ -1,0 +1,59 @@
+version: 2.1
+
+description: Record deployment on New Relic
+
+examples:
+  install_kubectl:
+    description: Record deployment on New Relic
+    usage:
+      version: 2.1
+
+      orbs:
+        new-relic: tiendanube/new-relic@1.0.0
+
+      jobs:
+        build:
+          docker:
+            - image: circleci/openjdk:8-jdk
+          steps:
+            - checkout
+            - new-relic/record-deployment:
+                app-id: ${NEW_RELIC_APP_ID}
+                api-key: ${NEW_RELIC_API_KEY}
+                revision: ${CIRCLE_SHA1:0:7}
+                user: ${CIRCLE_USERNAME}
+
+commands:
+  record-deployment:
+    description: Record deployment on New Relic
+    parameters:
+      app-id:
+        type: string
+        description: New Relic App ID
+        default: ${NEW_RELIC_APP_ID}
+      api-key:
+        type: string
+        description: New Relic Api Key
+        default: ${NEW_RELIC_API_KEY}
+      revision:
+        type: string
+        description: Application Revision
+        default: ${CIRCLE_SHA1:0:7}
+      user:
+        type: string
+        description: User that deployed the new version
+        default: ${CIRCLE_USERNAME}
+    steps:
+      - run:
+          command: >
+            run: >
+              curl -X POST "https://api.newrelic.com/v2/applications/<< parameters.app-id >>/deployments.json"
+              -H "X-Api-Key:<< parameters.api-key >>" -i
+              -H "Content-Type: application/json"
+              -d
+              '{
+                "deployment": {
+                  "revision": "'<< parameters.revision >>'",
+                  "user": "'<< parameters.user >>'"
+                }
+              }'
